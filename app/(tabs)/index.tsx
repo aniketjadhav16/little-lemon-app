@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Testimonials from "@/components/Testimonials";
 import { View, StyleSheet } from "react-native";
 
-export default function HomeScreen() {
+export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       <Navbar />

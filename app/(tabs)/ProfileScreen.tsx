@@ -9,20 +9,69 @@ import {
   Pressable,
   Image,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { MaskedTextInput } from "react-native-mask-text";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 
 export default function ProfileScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
   const [orderStatusChecked, setOrderStatusChecked] = useState(false);
   const [passwordChangesChecked, setPasswordChangesChecked] = useState(false);
   const [specialOffersChecked, setSpecialOffersChecked] = useState(false);
   const [newsletterChecked, setNewsletterChecked] = useState(false);
+
+  const router = useRouter();
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access media library is required!");
+      return;
+    }
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("isLoggedIn");
+    router.replace("/");
+  };
+
+  const renderProfilePicture = () => {
+    if (imageUri) {
+      return (
+        <TouchableOpacity onPress={pickImage}>
+          <Image style={styles.profilePicture} source={{ uri: imageUri }} />
+        </TouchableOpacity>
+      );
+    }
+    const initials =
+      (firstName ? firstName[0].toUpperCase() : "") +
+      (lastName ? lastName[0].toUpperCase() : "");
+    return (
+      <TouchableOpacity
+        style={[styles.profilePicture, styles.placeholder]}
+        onPress={pickImage}
+      >
+        <Text style={styles.initialsText}>{initials || "U"}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -30,15 +79,19 @@ export default function ProfileScreen() {
       <ScrollView style={styles.ProfileScreenContainer}>
         <Text style={styles.headerText}>Personal Information</Text>
         <View style={styles.profilePictureContainer}>
-          <Image
-            style={styles.profilePicture}
-            source={require("@/assets/images/Profile.png")}
-          />
-          <Pressable style={[styles.profileButtons, { backgroundColor: "#495E57" }]}>
+          {renderProfilePicture()}
+
+          <Pressable
+            style={[styles.profileButtons, { backgroundColor: "#495E57" }]}
+            onPress={pickImage}
+          >
             <Text style={styles.buttonText}>Change</Text>
           </Pressable>
 
-          <Pressable style={styles.profileButtons}>
+          <Pressable
+            style={styles.profileButtons}
+            onPress={() => setImageUri(null)}
+          >
             <Text style={[styles.buttonText, { color: "#495E57" }]}>Remove</Text>
           </Pressable>
         </View>
@@ -113,15 +166,21 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.footerButtonsContainer}>
           <Pressable style={styles.footerButtons}>
-            <Text style={[styles.buttonText, { color: "#495E57" }]}>Discard changes</Text>
+            <Text style={[styles.buttonText, { color: "#495E57" }]}>
+              Discard changes
+            </Text>
           </Pressable>
-          <Pressable style={[styles.footerButtons, { backgroundColor: "#495E57" }]}>
+          <Pressable
+            style={[styles.footerButtons, { backgroundColor: "#495E57" }]}
+          >
             <Text style={styles.buttonText}>Save Changes</Text>
           </Pressable>
         </View>
       </ScrollView>
-      <Pressable style={styles.logoutButton}>
-        <Text style={[styles.buttonText, { color: "black", fontWeight: "bold" }]}>Log out</Text>
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={[styles.buttonText, { color: "black", fontWeight: "bold" }]}>
+          Log out
+        </Text>
       </Pressable>
     </View>
   );
@@ -153,12 +212,23 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     borderRadius: 50,
   },
+  placeholder: {
+    backgroundColor: "#495E57",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  initialsText: {
+    color: "white",
+    fontSize: 28,
+    fontWeight: "bold",
+  },
   profileButtons: {
     borderWidth: 1,
     borderRadius: 5,
     borderColor: "#495E57",
     width: 95,
     height: 35,
+    justifyContent: "center",
   },
   buttonText: {
     textAlign: "center",
@@ -219,6 +289,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F4CE14",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10
+    marginBottom: 10,
   },
 });

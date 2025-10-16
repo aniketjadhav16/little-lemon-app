@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Keyboard,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 
 export default function InputsForLogin() {
   const [name, setName] = useState("");
@@ -15,6 +17,7 @@ export default function InputsForLogin() {
   const [error, setError] = useState("");
 
   const nameInputRef = useRef<TextInput>(null);
+  const router = useRouter()
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,7 +29,7 @@ export default function InputsForLogin() {
   const isNameValid = name.trim().length > 0;
   const canLogin = isNameValid && isEmailValid;
 
-  const handleLogin = () => {
+  const handleLogin = async() => {
     Keyboard.dismiss();
     setTouched({ name: true, email: true });
     if (!canLogin) {
@@ -34,6 +37,9 @@ export default function InputsForLogin() {
       return;
     }
     setError("");
+
+    await AsyncStorage.setItem("isLoggedIn", "true")
+    router.replace("/HomeScreen")
   };
 
   return (
