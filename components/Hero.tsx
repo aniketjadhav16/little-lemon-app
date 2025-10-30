@@ -1,21 +1,83 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Animated,
+  Easing,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRef, useState } from "react";
 
-export default function Hero() {
+export default function Hero({ showSearchBar }: { showSearchBar?: boolean }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const widthAnimation = useRef(new Animated.Value(40)).current;
+
+  const expandSearchBar = () => {
+    setIsExpanded(true);
+    Animated.timing(widthAnimation, {
+      toValue: containerWidth,
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const collapseSearch = () => {
+    Animated.timing(widthAnimation, {
+      toValue: 40,
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: false,
+    }).start(() => setIsExpanded(false));
+  };
   return (
-    <View style={styles.container}>
-      <Text style={styles.headerText}>Little Lemon</Text>
-      <Text style={styles.subHeaderText}>Chicago</Text>
-      <View style={styles.subContainer}>
-        <Text style={styles.descriptionText}>
-          We are a family owned Mediterranean restaurant, focused on traditional
-          recipes served with a modern twist.
-        </Text>
-        <Image
-          style={styles.image}
-          source={require("../assets/images/Hero-image.png")}
-        />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.headerText}>Little Lemon</Text>
+        <Text style={styles.subHeaderText}>Chicago</Text>
+        <View style={styles.subContainer}>
+          <Text style={styles.descriptionText}>
+            We are a family owned Mediterranean restaurant, focused on
+            traditional recipes served with a modern twist.
+          </Text>
+          <Image
+            style={styles.image}
+            source={require("../assets/images/Hero-image.png")}
+          />
+        </View>
+        {showSearchBar && (
+          <View
+            style={styles.searchContainer}
+            onLayout={(event) => {
+              const width = event.nativeEvent.layout.width;
+              setContainerWidth(width);
+            }}
+          >
+            <Animated.View
+              style={[styles.searchBox, { width: widthAnimation }]}
+            >
+              <TouchableOpacity onPress={expandSearchBar}>
+                <Ionicons name="search-outline" size={24} color={"#495E57"} />
+              </TouchableOpacity>
+              {isExpanded && (
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search menu..."
+                  autoFocus
+                  onBlur={collapseSearch}
+                />
+              )}
+            </Animated.View>
+          </View>
+        )}
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -51,6 +113,24 @@ const styles = StyleSheet.create({
     height: 120,
     resizeMode: "cover",
     borderRadius: 20,
-    marginBottom: 15
+    marginBottom: 15,
+  },
+  searchContainer: {
+    marginHorizontal: 15,
+    backgroundColor: "#495E57",
+    marginBottom: 20,
+  },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 50,
+    paddingHorizontal: 8,
+    height: 40,
+  },
+  searchInput: {
+    marginLeft: 8,
+    flex: 1,
+    height: 40,
   },
 });

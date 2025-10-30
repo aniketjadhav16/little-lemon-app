@@ -12,6 +12,13 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "app",
+    "components",
+    "constants",
+    "hooks",
+    "types",
+    "utils.ts",
+    "database.ts"
   ]
 }
