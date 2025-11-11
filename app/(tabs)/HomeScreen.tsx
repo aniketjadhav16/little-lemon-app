@@ -1,24 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
+import Filters from "@/components/Filters";
+import Hero from "@/components/Hero";
+import Navbar from "@/components/Navbar";
 import {
-  View,
-  Text,
+  createTable,
+  filterByQueryAndCategories,
+  getMenuItems,
+  saveMenuItems,
+} from "@/database";
+import { MenuItem } from "@/types/MenuItem";
+import { getSectionListData, useUpdateEffect } from "@/utils";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
   Image,
   SectionList,
   StyleSheet,
-  Alert,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import axios from "axios";
-import {
-  createTable,
-  getMenuItems,
-  saveMenuItems,
-  filterByQueryAndCategories,
-} from "@/database";
-import Filters from "@/components/Filters";
-import { getSectionListData, useUpdateEffect } from "@/utils";
-import { MenuItem } from "@/types/MenuItem";
 
 const API_URL =
   "https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json";
@@ -28,21 +30,21 @@ const IMAGE_BASE_URL =
 const sections = ["starters", "mains", "desserts"] as const;
 
 interface ItemProps {
-  title: string;
-  description: string;
-  price: string;
-  imageUrl: string;
+  item: MenuItem;
+  onPress: (item: MenuItem) => void;
 }
 
-const Item: React.FC<ItemProps> = ({ title, description, price, imageUrl }) => (
-  <View style={styles.item}>
-    <Image source={{ uri: imageUrl }} style={styles.image} />
-    <View style={{ flex: 1, marginLeft: 10 }}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
-      <Text style={styles.price}>${price}</Text>
+const Item: React.FC<ItemProps> = ({ item, onPress }) => (
+  <TouchableOpacity onPress={() => onPress(item)}>
+    <View style={styles.item}>
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.description}>{item.description}</Text>
+        <Text style={styles.price}>${item.price}</Text>
+      </View>
+      <Image source={{ uri: item.imageUrl }} style={styles.image} />
     </View>
-  </View>
+  </TouchableOpacity>
 );
 
 export default function HomeScreen() {
@@ -128,10 +130,20 @@ export default function HomeScreen() {
     setFilterSelections(arrayCopy);
   };
 
+  const router = useRouter();
+
+  const handleItemPress = (item: MenuItem) => {
+    router.push({
+      pathname: "/(tabs)/ItemDetailsScreen",
+      params: { menuItem: JSON.stringify(item) },
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Navbar />
-      <Hero showSearchBar={true} />
+      <Hero showSearchBar={true} handleSearchChange={handleSearchChange} />
+      <Text style={styles.deliveryText}>ORDER FOR DELIVERY!</Text>
       <Filters
         selections={filterSelections}
         onChange={handleFiltersChange}
@@ -142,15 +154,7 @@ export default function HomeScreen() {
         sections={data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Item
-            title={item.title}
-            description={item.description}
-            price={item.price}
-            imageUrl={item.imageUrl}
-          />
-        )}
-        renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.header}>{title}</Text>
+          <Item item={item} onPress={handleItemPress} />
         )}
       />
     </View>
@@ -160,40 +164,55 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#495E57",
+    backgroundColor: "white",
   },
   sectionList: {
     paddingHorizontal: 16,
   },
+  deliveryText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "black",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#495E57",
+    paddingVertical: 10,
+    backgroundColor: "white",
+  },
   item: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#495E57",
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    borderBottomColor: "#e0e0e0",
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: "center",
+    marginRight: 12,
   },
   image: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     borderRadius: 8,
   },
-  header: {
-    fontSize: 24,
-    paddingVertical: 8,
-    color: "#FBDABB",
-    backgroundColor: "#495E57",
-  },
   title: {
-    fontSize: 18,
-    color: "white",
+    fontSize: 16,
+    color: "black",
+    fontWeight: "bold",
+    marginBottom: 4,
   },
   description: {
-    fontSize: 14,
-    color: "#ccc",
+    fontSize: 12,
+    color: "#495E57",
+    marginBottom: 6,
   },
   price: {
-    fontSize: 16,
-    color: "#F4CE14",
+    fontSize: 14,
+    color: "#495E57",
+    fontWeight: "bold",
   },
 });

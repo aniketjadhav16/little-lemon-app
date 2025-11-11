@@ -13,9 +13,18 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRef, useState } from "react";
 
-export default function Hero({ showSearchBar }: { showSearchBar?: boolean }) {
+interface HeroProps {
+  showSearchBar?: boolean;
+  handleSearchChange?: (text: string) => void;
+}
+
+export default function Hero({ 
+  showSearchBar, 
+  handleSearchChange 
+}: HeroProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [searchText, setSearchText] = useState("");
   const widthAnimation = useRef(new Animated.Value(40)).current;
 
   const expandSearchBar = () => {
@@ -34,8 +43,18 @@ export default function Hero({ showSearchBar }: { showSearchBar?: boolean }) {
       duration: 300,
       easing: Easing.out(Easing.ease),
       useNativeDriver: false,
-    }).start(() => setIsExpanded(false));
+    }).start(() => {
+      setIsExpanded(false);
+    });
   };
+
+  const handleTextChange = (text: string) => {
+    setSearchText(text);
+    if (handleSearchChange) {
+      handleSearchChange(text);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -70,6 +89,8 @@ export default function Hero({ showSearchBar }: { showSearchBar?: boolean }) {
                   style={styles.searchInput}
                   placeholder="Search menu..."
                   autoFocus
+                  value={searchText}
+                  onChangeText={handleTextChange}
                   onBlur={collapseSearch}
                 />
               )}
