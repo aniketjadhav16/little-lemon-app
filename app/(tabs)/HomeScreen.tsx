@@ -9,6 +9,7 @@ import {
 } from "@/database";
 import { MenuItem } from "@/types/MenuItem";
 import { getSectionListData, useUpdateEffect } from "@/utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -56,6 +57,9 @@ export default function HomeScreen() {
   const [filterSelections, setFilterSelections] = useState<boolean[]>(
     sections.map(() => false)
   );
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
 
   const fetchData = async (): Promise<MenuItem[]> => {
     try {
@@ -139,9 +143,29 @@ export default function HomeScreen() {
     });
   };
 
+  useEffect(() => {
+    (async () => {
+      const uri = await AsyncStorage.getItem("profileImageUri");
+      const first = await AsyncStorage.getItem("firstName");
+      const last = await AsyncStorage.getItem("lastName");
+      setProfileImageUri(uri);
+      setFirstName(first || "");
+      setLastName(last || "");
+    })();
+  }, []);
+
+  const initials =
+    (firstName ? firstName[0].toUpperCase() : "") +
+    (lastName ? lastName[0].toUpperCase() : "");
+
   return (
     <View style={styles.container}>
-      <Navbar />
+      <Navbar
+        profileImageUri={profileImageUri}
+        initials={initials}
+        onProfilePress={() => router.push("/(tabs)/ProfileScreen")}
+        showBackButton={false}
+      />
       <Hero showSearchBar={true} handleSearchChange={handleSearchChange} />
       <Text style={styles.deliveryText}>ORDER FOR DELIVERY!</Text>
       <Filters

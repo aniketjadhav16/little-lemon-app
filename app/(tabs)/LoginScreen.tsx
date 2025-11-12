@@ -6,7 +6,7 @@ import { KeyboardAvoidingView, Platform, View, StyleSheet } from "react-native";
 export default function LoginScreen() {
   return (
     <View style={styles.container}>
-      <Navbar />
+      <Navbar showBackButton={true}/>
       <Hero />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

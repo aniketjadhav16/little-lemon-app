@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface FiltersProps {
   onChange: (index: number) => void;
@@ -13,51 +13,63 @@ const Filters: React.FC<FiltersProps> = ({
   sections,
 }) => {
   return (
-    <View style={styles.filtersContainer}>
-      {sections.map((section, index) => (
-        <TouchableOpacity
-          key={index}
-          onPress={() => onChange(index)}
-          style={[
-            styles.filterButton,
-            {
-              backgroundColor: selections[index] ? "#EE9972" : "#495E57",
-            },
-          ]}
-        >
-          <Text
+    <>
+      <View style={styles.filtersContainer}>
+        {sections.map((section, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => onChange(index)}
             style={[
-              styles.filterText,
+              styles.filterButton,
               {
-                color: selections[index] ? "black" : "white",
+                backgroundColor: selections[index] ? "#495E57" : "#F0F0F0",
               },
             ]}
           >
-            {section}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
+            <Text
+              style={[
+                styles.filterText,
+                {
+                  color: selections[index] ? "white" : "#495E57",
+                },
+              ]}
+            >
+              {section.charAt(0).toUpperCase() + section.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.filterBorder} />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   filtersContainer: {
-    backgroundColor: "green",
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 16,
+  },
+  filterBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccccccff",
+    marginHorizontal: 16,
     marginBottom: 16,
   },
   filterButton: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    padding: 12,
     borderWidth: 1,
     borderColor: "white",
+    borderRadius: 20,
+    marginHorizontal: 10,
   },
   filterText: {
     fontSize: 16,
+    fontWeight: "bold",
+    color: "#495E57",
   },
 });
 

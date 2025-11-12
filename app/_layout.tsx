@@ -18,16 +18,15 @@ export default function RootLayout() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname === "/") {
-      setLoading(false);
-      return;
-    }
-
+  if (pathname === "/" || pathname === "/some-unauthenticated-path") {
     const checkLoginStatus = async () => {
       try {
         const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
         if (isLoggedIn === "true") {
           router.replace("/HomeScreen");
+        }
+        else {
+          router.replace("/(tabs)/OnboardingScreen")
         }
       } catch (error) {
         console.log("Error during login: ", error);
@@ -37,7 +36,11 @@ export default function RootLayout() {
     };
 
     checkLoginStatus();
-  }, [pathname, router]);
+  } else {
+    setLoading(false);
+  }
+}, [pathname, router]);
+
 
   if (loading) {
     return (

@@ -1,35 +1,52 @@
 import Navbar from "@/components/Navbar";
-import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  TextInput,
-  ScrollView,
-  View,
-  Text,
-  Pressable,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import { Checkbox } from "react-native-paper";
-import { MaskedTextInput } from "react-native-mask-text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { MaskedTextInput } from "react-native-mask-text";
+import { Checkbox } from "react-native-paper";
 
 export default function ProfileScreen() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
   const [imageUri, setImageUri] = useState<string | null>(null);
-
-  const [orderStatusChecked, setOrderStatusChecked] = useState(false);
-  const [passwordChangesChecked, setPasswordChangesChecked] = useState(false);
-  const [specialOffersChecked, setSpecialOffersChecked] = useState(false);
-  const [newsletterChecked, setNewsletterChecked] = useState(false);
+  const [orderStatusChecked, setOrderStatusChecked] = useState<boolean>(false);
+  const [passwordChangesChecked, setPasswordChangesChecked] = useState<boolean>(false);
+  const [specialOffersChecked, setSpecialOffersChecked] = useState<boolean>(false);
+  const [newsletterChecked, setNewsletterChecked] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      const loggedIn = await AsyncStorage.getItem("isLoggedIn");
+      setIsLoggedIn(loggedIn === "true");
+      const uri = await AsyncStorage.getItem("profileImageUri");
+      const first = await AsyncStorage.getItem("firstName");
+      const last = await AsyncStorage.getItem("lastName");
+      const emailVal = await AsyncStorage.getItem("email");
+      const phoneVal = await AsyncStorage.getItem("phone");
+      setImageUri(uri);
+      setFirstName(first || "");
+      setLastName(last || "");
+      setEmail(emailVal || "");
+      setPhone(phoneVal || "");
+    })();
+  }, []);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -42,14 +59,39 @@ export default function ProfileScreen() {
       allowsEditing: true,
       quality: 1,
     });
-    if (!result.canceled && result.assets.length > 0) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setImageUri(result.assets[0].uri);
     }
   };
 
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem("isLoggedIn");
-    router.replace("/");
+  const handleButtonPress = async () => {
+    if (isLoggedIn) {
+      await AsyncStorage.removeItem("isLoggedIn");
+      router.push("/(tabs)/OnboardingScreen");
+    } else {
+      router.push("/(tabs)/LoginScreen");
+    }
+  };
+
+  const handleSave = async () => {
+    await AsyncStorage.setItem("profileImageUri", imageUri || "");
+    await AsyncStorage.setItem("firstName", firstName);
+    await AsyncStorage.setItem("lastName", lastName);
+    await AsyncStorage.setItem("email", email);
+    await AsyncStorage.setItem("phone", phone);
+  };
+
+  const handleDiscard = async () => {
+    const uri = await AsyncStorage.getItem("profileImageUri");
+    const first = await AsyncStorage.getItem("firstName");
+    const last = await AsyncStorage.getItem("lastName");
+    const emailVal = await AsyncStorage.getItem("email");
+    const phoneVal = await AsyncStorage.getItem("phone");
+    setImageUri(uri);
+    setFirstName(first || "");
+    setLastName(last || "");
+    setEmail(emailVal || "");
+    setPhone(phoneVal || "");
   };
 
   const renderProfilePicture = () => {
@@ -60,39 +102,36 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       );
     }
-    const initials =
-      (firstName ? firstName[0].toUpperCase() : "") +
-      (lastName ? lastName[0].toUpperCase() : "");
     return (
-      <TouchableOpacity
-        style={[styles.profilePicture, styles.placeholder]}
-        onPress={pickImage}
-      >
-        <Text style={styles.initialsText}>{initials || "U"}</Text>
+      <TouchableOpacity onPress={pickImage}>
+        <Image
+          style={styles.profilePicture}
+          source={require("@/assets/images/Profile.png")}
+        />
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Navbar />
+      <Navbar showBackButton />
       <ScrollView style={styles.ProfileScreenContainer}>
         <Text style={styles.headerText}>Personal Information</Text>
         <View style={styles.profilePictureContainer}>
           {renderProfilePicture()}
-
           <Pressable
             style={[styles.profileButtons, { backgroundColor: "#495E57" }]}
             onPress={pickImage}
           >
             <Text style={styles.buttonText}>Change</Text>
           </Pressable>
-
           <Pressable
             style={styles.profileButtons}
             onPress={() => setImageUri(null)}
           >
-            <Text style={[styles.buttonText, { color: "#495E57" }]}>Remove</Text>
+            <Text style={[styles.buttonText, { color: "#495E57" }]}>
+              Remove
+            </Text>
           </Pressable>
         </View>
         <KeyboardAvoidingView style={styles.userInfoContainer}>
@@ -102,13 +141,13 @@ export default function ProfileScreen() {
             placeholder="Enter first name"
             returnKeyType="next"
             value={firstName}
-            onChangeText={(text) => setFirstName(text)}
+            onChangeText={setFirstName}
           />
           <Text style={styles.userInfoText}>Last name</Text>
           <TextInput
             style={styles.inputText}
             value={lastName}
-            onChangeText={(text) => setLastName(text)}
+            onChangeText={setLastName}
             placeholder="Enter last name"
           />
           <Text style={styles.userInfoText}>Email</Text>
@@ -116,7 +155,7 @@ export default function ProfileScreen() {
             style={styles.inputText}
             placeholder="Enter email"
             value={email}
-            onChangeText={(text) => setEmail(text)}
+            onChangeText={setEmail}
             keyboardType="email-address"
           />
           <Text style={styles.userInfoText}>Phone number</Text>
@@ -124,7 +163,7 @@ export default function ProfileScreen() {
             style={styles.inputText}
             placeholder="Enter phone number"
             value={phone}
-            onChangeText={(text, rawText) => setPhone(rawText)}
+            onChangeText={(_text, rawText) => setPhone(rawText)}
             keyboardType="phone-pad"
             mask="(999) 999-9999"
           />
@@ -165,21 +204,22 @@ export default function ProfileScreen() {
           </View>
         </View>
         <View style={styles.footerButtonsContainer}>
-          <Pressable style={styles.footerButtons}>
+          <Pressable style={styles.footerButtons} onPress={handleDiscard}>
             <Text style={[styles.buttonText, { color: "#495E57" }]}>
               Discard changes
             </Text>
           </Pressable>
           <Pressable
             style={[styles.footerButtons, { backgroundColor: "#495E57" }]}
+            onPress={handleSave}
           >
             <Text style={styles.buttonText}>Save Changes</Text>
           </Pressable>
         </View>
       </ScrollView>
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+      <Pressable style={styles.logoutButton} onPress={handleButtonPress}>
         <Text style={[styles.buttonText, { color: "black", fontWeight: "bold" }]}>
-          Log out
+          {isLoggedIn ? "Log out" : "Create Account"}
         </Text>
       </Pressable>
     </View>
@@ -240,7 +280,7 @@ const styles = StyleSheet.create({
   },
   userInfoText: {
     fontSize: 14,
-    fontWeight: "semibold",
+    fontWeight: "600",
     marginBottom: 5,
   },
   inputText: {
@@ -261,7 +301,7 @@ const styles = StyleSheet.create({
   },
   checkboxText: {
     fontSize: 14,
-    fontWeight: "semibold",
+    fontWeight: "600",
   },
   footerButtonsContainer: {
     flexDirection: "row",
@@ -282,10 +322,9 @@ const styles = StyleSheet.create({
     bottom: 10,
     left: 20,
     right: 20,
-    borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
     borderColor: "#495E57",
-    height: 35,
+    height: 50,
     backgroundColor: "#F4CE14",
     justifyContent: "center",
     alignItems: "center",

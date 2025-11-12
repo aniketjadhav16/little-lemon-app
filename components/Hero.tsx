@@ -18,9 +18,9 @@ interface HeroProps {
   handleSearchChange?: (text: string) => void;
 }
 
-export default function Hero({ 
-  showSearchBar, 
-  handleSearchChange 
+export default function Hero({
+  showSearchBar,
+  handleSearchChange
 }: HeroProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
