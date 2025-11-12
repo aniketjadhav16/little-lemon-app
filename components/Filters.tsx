@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "white",
     borderRadius: 20,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
   },
   filterText: {
     fontSize: 16,

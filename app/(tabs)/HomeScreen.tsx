@@ -28,7 +28,7 @@ const API_URL =
 const IMAGE_BASE_URL =
   "https://github.com/Meta-Mobile-Developer-PC/Working-With-Data-API/blob/main/images/";
 
-const sections = ["starters", "mains", "desserts"] as const;
+const sections = ["starters", "mains", "desserts", "drinks"] as const;
 
 interface ItemProps {
   item: MenuItem;
