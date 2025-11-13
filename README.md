@@ -1,3 +1,5 @@
+![wireframe](https://github.com/aniketjadhav16/little-lemon-app/blob/f906ecca2c7ec43d910801ee0e5d3cd34e8d60f6/wireframe/Little-lemon-app.jpg)
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
