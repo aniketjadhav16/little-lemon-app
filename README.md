@@ -1,8 +1,8 @@
-#Wireframe
+# Wireframe
 
 ![wireframe](https://github.com/aniketjadhav16/little-lemon-app/blob/f906ecca2c7ec43d910801ee0e5d3cd34e8d60f6/wireframe/Little-lemon-app.jpg)
 
-#Little lemon app demo
+# Little lemon app demo
 
 ![demo](https://github.com/aniketjadhav16/little-lemon-app/blob/ebf2a45cb94b1ecc70c461615d45cebd5a8d8ec5/Little-lemon-app.gif)
 
